@@ -89,7 +89,18 @@ public class StatementGenerator extends CodeGenerator
      */
     public void emitIf(PascalParser.IfStatementContext ctx)
     {
-        /***** Complete this method. *****/
+        Label met = new Label();
+        Label end = new Label();
+        compiler.visit(ctx.expression());
+        emit(IFNE, met);
+        if(ctx.falseStatement() != null)
+        {
+            compiler.visit(ctx.falseStatement());
+        }
+        emit(GOTO, end);
+        emitLabel(met);
+        compiler.visit(ctx.trueStatement());
+        emitLabel(end);
     }
     
     /**
