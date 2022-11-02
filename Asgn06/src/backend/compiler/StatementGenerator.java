@@ -138,6 +138,16 @@ public class StatementGenerator extends CodeGenerator
     public void emitWhile(PascalParser.WhileStatementContext ctx)
     {
         /***** Complete this method. *****/
+        Label loopTopLabel  = new Label();
+        Label loopExitLabel = new Label();
+
+        compiler.visit(ctx.expression());
+        compiler.visit(ctx.statement());
+
+        emit(IFEQ, loopTopLabel);
+        emit(GOTO, loopExitLabel); // if equal go back if not exit loop
+
+        emitLabel(loopExitLabel);
     }
     
     /**
@@ -147,6 +157,19 @@ public class StatementGenerator extends CodeGenerator
     public void emitFor(PascalParser.ForStatementContext ctx)
     {
         /***** Complete this method. *****/
+        Label loopTopLabel  = new Label();
+        Label loopExitLabel = new Label();
+        Label toLabel = new Label();
+        Label downtoLabel = new Label();
+
+//        compiler.visit(ctx.expression());
+//        compiler.visit(ctx.statement());
+//
+//        emit(IFEQ, loopTopLabel);
+//        emit();
+
+
+
     }
     
     /**
