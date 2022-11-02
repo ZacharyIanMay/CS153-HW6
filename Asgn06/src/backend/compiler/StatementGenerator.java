@@ -156,22 +156,52 @@ public class StatementGenerator extends CodeGenerator
      */
     public void emitFor(PascalParser.ForStatementContext ctx)
     {
-//        compiler.visit(ctx.expression());
-//        compiler.visit(ctx.statement());
-//
-//        emit(IFEQ, loopTopLabel);
-//        emit();
         Label start = new Label();
         Label end = new Label();
-        //TODO: create variable
+        boolean flag = ctx.TO() != null;
+
+        // Storing value into variable
+        compiler.visit(ctx.expression(0));
+        emitStoreValue(ctx.variable().entry, ctx.variable().type);
+
+        // Start of loop
         emitLabel(start);
-        //TODO: check if using to or downto
-        //TODO: check condition
-        //TODO: emit body code
-        //TODO: add or subtract one
+
+        // Checking condition
+        if(flag)
+        {
+            //cheking to
+            compiler.visit(ctx.expression(1));
+            emitLoadValue(ctx.variable().entry);
+            emit(IF_ICMPLT, end);
+        }
+        else
+        {
+            //checking downto
+            compiler.visit(ctx.expression(1));
+            emitLoadValue(ctx.variable().entry);
+            emit(IF_ICMPGT, end);
+        }
+
+        // Main body of loop
+        compiler.visit(ctx.statement());
+
+        // Updating value of variable
+        emitLoadValue(ctx.variable().entry);
+        emitLoadConstant(1);
+        if(flag)
+        {
+            emit(IADD);
+        }
+        else
+        {
+            emit(ISUB);
+        }
+        emitStoreValue(ctx.variable().entry, ctx.variable().type);
+
+        // End of loop
+        emit(GOTO, start);
         emitLabel(end);
-
-
     }
     
     /**
