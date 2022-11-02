@@ -137,16 +137,16 @@ public class StatementGenerator extends CodeGenerator
      */
     public void emitWhile(PascalParser.WhileStatementContext ctx)
     {
-        /***** Complete this method. *****/
         Label loopTopLabel  = new Label();
         Label loopExitLabel = new Label();
 
+        emitLabel(loopTopLabel);
+
         compiler.visit(ctx.expression());
+        emit(IFEQ, loopExitLabel); // if equal continue if not exit loop
+
         compiler.visit(ctx.statement());
-
-        emit(IFEQ, loopTopLabel);
-        emit(GOTO, loopExitLabel); // if equal go back if not exit loop
-
+        emit(GOTO, loopTopLabel);
         emitLabel(loopExitLabel);
     }
     
@@ -156,18 +156,20 @@ public class StatementGenerator extends CodeGenerator
      */
     public void emitFor(PascalParser.ForStatementContext ctx)
     {
-        /***** Complete this method. *****/
-        Label loopTopLabel  = new Label();
-        Label loopExitLabel = new Label();
-        Label toLabel = new Label();
-        Label downtoLabel = new Label();
-
 //        compiler.visit(ctx.expression());
 //        compiler.visit(ctx.statement());
 //
 //        emit(IFEQ, loopTopLabel);
 //        emit();
-
+        Label start = new Label();
+        Label end = new Label();
+        //TODO: create variable
+        emitLabel(start);
+        //TODO: check if using to or downto
+        //TODO: check condition
+        //TODO: emit body code
+        //TODO: add or subtract one
+        emitLabel(end);
 
 
     }
@@ -178,7 +180,15 @@ public class StatementGenerator extends CodeGenerator
      */
     public void emitProcedureCall(PascalParser.ProcedureCallStatementContext ctx)
     {
-        /***** Complete this method. *****/
+        Label start = new Label();
+        Label end = new Label();
+        //TODO: create variable
+        emitLabel(start);
+        //TODO: check if using to or downto
+        //TODO: check condition
+        //TODO: emit body code
+        //TODO: add or subtract one
+        emitLabel(end);
     }
     
     /**
