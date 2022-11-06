@@ -110,6 +110,27 @@ public class StatementGenerator extends CodeGenerator
     public void emitCase(PascalParser.CaseStatementContext ctx)
     {
         /***** Complete this method. *****/
+        Label startLabel = new Label();
+        Label branchLabel = new Label();
+        Label endLabel = new Label();
+
+        emitLabel(startLabel);
+
+        compiler.visit(ctx.expression()); //after CASE expression
+        compiler.visit(ctx.statement());
+        //for each constant list
+        emit(LOOKUPSWITCH, branchLabel);
+        emitLabel(branchLabel);
+
+        //check default
+        emit(DEFAULT, endLabel);
+        emitLabel(endLabel);
+        //all labels go to the end label
+        emit(GOTO, endLabel);
+        emitLabel(endLabel);
+
+
+
     }
 
     /**
