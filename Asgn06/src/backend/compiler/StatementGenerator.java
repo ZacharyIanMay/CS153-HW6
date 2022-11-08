@@ -1,10 +1,6 @@
 package backend.compiler;
 
-import java.util.ArrayList;
-import java.util.TreeMap;
-import java.util.Set;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import antlr4.PascalParser;
 
@@ -109,28 +105,64 @@ public class StatementGenerator extends CodeGenerator
      */
     public void emitCase(PascalParser.CaseStatementContext ctx)
     {
-        /***** Complete this method. *****/
-        Label startLabel = new Label();
-        Label branchLabel = new Label();
-        Label endLabel = new Label();
-
-        emitLabel(startLabel);
-
-        compiler.visit(ctx.expression()); //after CASE expression
-        compiler.visit(ctx.statement());
-        //for each constant list
-        emit(LOOKUPSWITCH, branchLabel);
-        emitLabel(branchLabel);
-
-        //check default
-        emit(DEFAULT, endLabel);
-        emitLabel(endLabel);
-        //all labels go to the end label
-        emit(GOTO, endLabel);
-        emitLabel(endLabel);
-
-
-
+    	HashMap<PascalParser.CaseBranchContext, Label> branchMap = new HashMap<PascalParser.CaseBranchContext, Label>();    //branches
+    	TreeMap<Integer, Label> constantMap = new TreeMap<Integer, Label>();    //constants
+    	
+    	Label endLabel = new Label();
+    	
+    	PascalParser.CaseBranchListContext branchList = ctx.caseBranchList();
+    	
+    	for (int i = 0; i < branchList.caseBranch().size(); i++)     //store branch labels
+    	{
+    		if (branchList.caseBranch(i).caseConstantList() != null)
+    		{
+    			Label branchLabel = new Label();
+        		branchMap.put(branchList.caseBranch(i), branchLabel);
+    		}
+    	}
+    	
+    	compiler.visit(ctx.expression());
+    	
+    	emit(LOOKUPSWITCH);
+    	
+    	for(Map.Entry<PascalParser.CaseBranchContext, Label> entry : branchMap.entrySet())    //store constants with branch labels
+    	{
+    		PascalParser.CaseBranchContext b = entry.getKey();
+    		Label l = entry.getValue();
+    		
+    		if (b.caseConstantList() != null)
+    		{
+    			for (int i = 0; i < b.caseConstantList().caseConstant().size(); i++)
+    			{
+    				constantMap.put(b.caseConstantList().caseConstant(i).value, l);
+    			}
+    		}
+    	}
+    	
+    	for(Map.Entry<Integer, Label> entry : constantMap.entrySet())    //create constant labels within lookupswitch
+    	{
+    		Integer i = entry.getKey();
+    		Label l = entry.getValue();
+    		
+    		emitLabel(i, l);
+    	}
+    	
+    	emitLabel("default", endLabel);    //create default label within lookupswitch
+    	
+    	for(Map.Entry<PascalParser.CaseBranchContext, Label> entry : branchMap.entrySet())    //emit each branch label, visit statement, and go to default label
+    	{
+    		PascalParser.CaseBranchContext b = entry.getKey();
+    		Label l = entry.getValue();
+    		
+    		if (b.caseConstantList() != null)
+    		{
+        		emitLabel(l);
+        		compiler.visit(b.statement());
+        		emit(GOTO, endLabel);
+    		}
+    	}
+    	
+    	emitLabel(endLabel);
     }
 
     /**
@@ -191,7 +223,7 @@ public class StatementGenerator extends CodeGenerator
         // Checking condition
         if(flag)
         {
-            //cheking to
+            //checking to
             compiler.visit(ctx.expression(1));
             emitLoadValue(ctx.variable().entry);
             emit(IF_ICMPLT, end);
@@ -517,4 +549,3 @@ public class StatementGenerator extends CodeGenerator
             emit(POP);                 
         }
     }
-}
