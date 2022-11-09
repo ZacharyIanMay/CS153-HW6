@@ -263,15 +263,7 @@ public class StatementGenerator extends CodeGenerator
      */
     public void emitProcedureCall(PascalParser.ProcedureCallStatementContext ctx)
     {
-        Label start = new Label();
-        Label end = new Label();
-        //TODO: create variable
-        emitLabel(start);
-        //TODO: check if using to or downto
-        //TODO: check condition
-        //TODO: emit body code
-        //TODO: add or subtract one
-        emitLabel(end);
+        emitCall(ctx.procedureName().entry, ctx.argumentList());
     }
     
     /**
@@ -280,7 +272,7 @@ public class StatementGenerator extends CodeGenerator
      */
     public void emitFunctionCall(PascalParser.FunctionCallContext ctx)
     {
-        /***** Complete this method. *****/
+        emitCall(ctx.functionName().entry, ctx.argumentList());
     }
     
     /**
