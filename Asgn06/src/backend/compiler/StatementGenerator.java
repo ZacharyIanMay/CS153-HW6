@@ -283,7 +283,41 @@ public class StatementGenerator extends CodeGenerator
     private void emitCall(SymtabEntry routineId,
                           PascalParser.ArgumentListContext argListCtx)
     {
-        /***** Complete this method. *****/
+        if (argListCtx != null)			//visit argument expressions
+        {
+        	for(int i = 0; i < argListCtx.argument().size(); i++) 
+        	{
+        		PascalParser.ExpressionContext expression = argListCtx.argument(i).expression();
+        		
+        		compiler.visit(expression);
+        		
+        		if (expression.type == Predefined.integerType && routineId.getRoutineParameters().get(i).getType() == Predefined.realType)
+        		{
+        			expression.type = Predefined.realType;
+        			emit(I2F);
+        		} else if (expression.type == Predefined.realType && routineId.getRoutineParameters().get(i).getType() == Predefined.integerType)
+        		{
+        			expression.type = Predefined.integerType;
+        			emit(F2I);
+        		}
+        	}
+        }
+        
+        String invokeCall = routineId.getSymtab().getOwner().getName() + "/" + routineId.getName() + "(";
+        
+        if (routineId.getRoutineParameters() != null)			//parameters
+        {
+        	for (int i = 0; i < routineId.getRoutineParameters().size(); i++)
+        	{
+        		invokeCall = invokeCall + typeDescriptor(routineId.getRoutineParameters().get(i));
+        	}
+        }
+        
+        invokeCall = invokeCall + ")" + typeDescriptor(routineId);			
+        
+        emit(INVOKESTATIC, invokeCall);		// invokestatic programName/<functionName or procedureName>(paramTypes)returnType
+        
+        //emit(PUTSTATIC, putCall);
     }
 
     /**
